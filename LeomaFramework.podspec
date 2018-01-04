@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   s.author                    = { "humphrywang" => "humphrywang@hotmail.com" }
   s.source                    = { :git => "https://github.com/humphrywang/LeomaFramework.git", :tag => s.version.to_s }
 
-  s.platform                  = :ios, '6.0'
+  s.platform                  = :ios, '8.0'
 
   s.subspec 'Base64' do |base64|
     base64.source_files = 'LeomaVendor/Base64/*.{h,m}'
