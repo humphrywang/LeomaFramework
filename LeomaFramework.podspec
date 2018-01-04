@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   s.homepage                  = "https://github.com/humphrywang"
   s.license                   =  { :type => "Apache", :file => "LICENSE" }
   s.author                    = { "humphrywang" => "humphrywang@hotmail.com" }
-  s.source                    = { :git => "https://github.com/humphrywang/LeomaFramework.git", :tag => s.version }
+  s.source                    = { :git => "https://github.com/humphrywang/LeomaFramework.git", :tag => s.version.to_s }
 
   s.platform                  = :ios, '6.0'
 
