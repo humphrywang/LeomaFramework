@@ -1,0 +1,197 @@
+(function (w, h) {
+    //History Track
+    function track (fn) {
+        return function interceptor () {
+            var prototype = fn.apply(this, arguments);
+            w.location.href = "history://ct.ctrip.com/m";
+            return prototype;
+        };
+    };
+    h.pushState = track(h.pushState);
+    h.replaceState = track(h.replaceState);
+    //Leoma Inject;
+    var tool = {
+        CallBacks: {},
+        AjaxPost: function (params) {
+            var xmlHttpReq = new XMLHttpRequest();
+            if (xmlHttpReq != null) {
+                xmlHttpReq.open("GET", "//" + location.host + "/Leoma/InterAction?" + (JSON.stringify(params) || "{}"), true);
+                xmlHttpReq.onreadystatechange = function () {
+                    if (xmlHttpReq.readyState == 4) {
+                        if (xmlHttpReq.status == 200 || xmlHttpReq.readyState == 0) {
+                            Leoma.CallBack(params.CallBack, JSON.parse(xmlHttpReq.responseText));
+                        }
+                    }
+                }
+                xmlHttpReq.send(null);
+            }
+        },
+        AnalysisResponse: function (data) {
+            if (!data) return null;
+            if (data.status && data.status.code == 0) return data.data;
+            return null;
+        },
+        Register: function () {
+            var platforms = ["None", "iOS", "Android"];
+            var cores = ["None", "WebKit", "UIKit", "XWalk", "WebView"];
+            var asyncs = ["None", "JSCore", "Prompt", "Ajax", "Message"];
+            var syncs = ["None", "JSCore", "Prompt"];
+            Leoma[platforms[leoma.Platform]] = true;
+            Leoma[cores[leoma.Core]] = true;
+            Leoma["Async" + asyncs[leoma.Async]] = true;
+            Leoma["Sync" + syncs[leoma.Sync]] = true;
+        },
+        UUID: function (radix, len) {
+            var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+            var uuid = [], i;
+            radix = radix || chars.length;
+
+            if (len) {
+                // Compact form
+                for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random() * radix];
+            }
+            else {
+                // rfc4122, version 4 form
+                var r;
+                // rfc4122 requires these characters
+                uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+                uuid[14] = '4';
+
+                // Fill in random data.  At i==19 set the high bits of clock sequence as per
+                // rfc4122, sec. 4.1.5
+                for (i = 0; i < 36; i++) {
+                    if (!uuid[i]) {
+                        r = 0 | Math.random() * 16;
+                        uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+                    }
+                }
+            }
+            return uuid.join('');
+        }
+    };
+    /**
+     * Platform: 0,    //1-ios, 2-Android
+     * Core:0,         //1-WebKit, 2-UIKit, 3-XWalk, 4-WebView
+     * Async:0,        //1-JSCore(JSInterface)[ios|Android], 2-Prompt[ios], 3-Ajax[ios|Android], 4-Message[ios]
+     * Sync:0,         //1-JSCore(JSInterface)[ios|Android], 2-Prompt[ios]
+     */
+    var leoma = {
+        /*$1*/
+        InvokePlatformIOS: function (params) {
+            if (Leoma.WebKit && params.CallBack) return this.InvokePlatWebKitAsync(params);
+            else if (Leoma.WebKit && !params.CallBack) return this.InvokePlatWebKitSync(params);
+            else if (Leoma.UIKit && params.CallBack) return this.InvokePlatUIKitAsync(params);
+            else if (Leoma.UIKit && !params.CallBack) return this.InvokePlatUIKitSync(params);
+            return InvokeResultError(params);
+        },
+        InvokePlatWebKitAsync: function (params) {
+            params.InterAction = 2;
+            if (Leoma.AsyncPrompt) prompt(JSON.stringify(params));
+            else if (Leoma.AsyncMessage) window.webkit.messageHandlers.Leoma.postMessage(params);
+            else this.InvokeResultError(params);
+            return null;
+        },
+        InvokePlatWebKitSync: function (params) {
+            params.InterAction = 1;
+            if (Leoma.SyncPrompt) return JSON.parse(prompt(JSON.stringify(params)));
+            return this.InvokeResultError(params);
+        },
+        InvokePlatUIKitAsync: function (params) {
+            if (Leoma.AsyncAjax) {
+                params.InterAction = 3;
+                tool.AjaxPost(params);
+            } else if (Leoma.AsyncJSCore) {
+                params.InterAction = 2;
+                LeomaCore.Invoke(params);
+            } else if (Leoma.AsyncPrompt) {
+                params.InterAction = 2;
+                prompt(JSON.stringify(params));
+            } else this.InvokeResultError(params);
+            return null;
+        },
+        InvokePlatUIKitSync: function (params) {
+            params.InterAction = 1;
+            if (Leoma.SyncJSCore) return LeomaCore.Invoke(params);
+            else if (Leoma.SyncPrompt) return JSON.parse(prompt(JSON.stringify(params)));
+            return this.InvokeResultError(params);
+        },
+        InvokePlatformAndroid: function (params) {
+            if ((Leoma.XWalk || Leoma.WebView) && params.CallBack) return this.InvokeAndroidAsync(params);
+            else if ((Leoma.XWalk || Leoma.WebView) && !params.CallBack) return this.InvokeAndroidSync(params);
+            return this.InvokeResultError(params);
+        },
+        InvokeAndroidAsync: function (params) {
+            if (Leoma.AsyncJSCore) {
+                params.InterAction = 2;
+                LeomaCore.Invoke(JSON.stringify(params));
+            } else if (Leoma.AsyncAjax) {
+                params.InterAction = 3;
+                tool.AjaxPost(params);
+            } else this.InvokeResultError(params);
+            return null;
+        },
+        InvokeAndroidSync: function (params) {
+            params.InterAction = 1;
+            if (Leoma.SyncJSCore) {
+                var result = LeomaCore.Invoke(JSON.stringify(params));
+                return result ? JSON.parse(result) : null;
+            }
+            return this.InvokeResultError(params);
+        },
+        InvokeResultError: function (params) {
+            console.log("<Leoma> InterAction [" + params.Handler + "] Error Of Code 102");
+            var response = { status: { code: 102 }, data: null };
+            if (params.CallBack) {
+                Leoma.CallBack(params.CallBack, response);
+                return null;
+            } else return response;
+        }
+    };
+    w.Leoma = {
+        SetCookie: function (cookieString, clear) {
+            if (!cookieString) return;
+            var cookies = cookieString.split("; ");
+            var date = new Date();
+            date.setFullYear(date.getFullYear() + 1);
+            for (var i = 0; i < cookies.length; i++) {
+                var temp = cookies[i].split("=");
+                if (temp.length != 2) continue;
+                document.cookie = temp[0] + "=" + (clear ? "" : temp[1]) + ";Path=/;expires=" + date.toGMTString();
+            }
+        },
+        Rights: {
+            /*$2*/
+        },
+        Invoke: function (handler, params, callBack) {
+            var Params = {};
+            var UUID = tool.UUID(16, 8);
+            Params.UUID = UUID;
+            Params.Handler = handler;
+            Params.Data = params;
+            Params.UA = navigator.userAgent;
+            if (callBack) {
+                var callBackID = "CallBack_" + UUID;
+                tool.CallBacks[callBackID] = callBack;
+                Params.CallBack = callBackID;
+            }
+            var result;
+            if (this.iOS) result = leoma.InvokePlatformIOS(Params);
+            else if (this.Android) result = leoma.InvokePlatformAndroid(Params);
+            else result = leoma.InvokeResultError(Params);
+            return tool.AnalysisResponse(result);
+        },
+        CallBack: function (callBackId, data) {
+            var callBack = tool.CallBacks[callBackId];
+            if (callBack) callBack(tool.AnalysisResponse(data), ((data||{}).status||{}).code||0);
+            delete tool.CallBacks[callBackId];
+        },
+        Log: function (content) {
+            if (this.Rights.Extern) Leoma.Invoke("DeviceApp.console_log", "" + content);
+        }/*$3*/
+    };
+    tool.Register();
+    if (Leoma.Rights.Extern){
+        Leoma.SetCookie(document.cookie, true);
+        Leoma.SetCookie(Leoma.Invoke("DeviceApp.cookies"));
+    }
+})(window, history);
