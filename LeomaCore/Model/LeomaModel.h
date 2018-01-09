@@ -15,7 +15,8 @@ typedef NS_ENUM(NSInteger, LeomaInteraction){
     LeomaInteractionSyncReturn,//同步的返回值式的交互
     //LeomaInteractionSyncAjax,//同步的Ajax请求式的交互
     LeomaInteractionAsyncCallBack,//异步的回调函数式的交互
-    LeomaInteractionAsyncAjax//异步的Ajax请求式的交互
+    LeomaInteractionAsyncAjax,//异步的Ajax请求式的交互
+    LeomaInteractionAsyncNative//Native调用的方式
 };
 
 @interface LeomaInteractionModel : NSObject
@@ -29,6 +30,7 @@ typedef NS_ENUM(NSInteger, LeomaInteraction){
 @property (nonatomic, strong) NSURLProtocol *                   Protocol;//Case LeomaInteractionSyncAjax & LeomaInteractionASyncAjax
 @property (nonatomic, copy)   NSString *                        UUID;
 @property (nonatomic, copy)   NSString *                        UA;
+@property (nonatomic, copy)   void(^NativeCompletion)(NSInteger code, id result);
 
 @property (nonatomic, assign, readonly) BOOL                    legal;
 

@@ -146,6 +146,8 @@ LeomaResponse* sendLeomaInteractionResponse(LeomaInteractionModel* userInfo, Leo
         [userInfo.WebView executeJS:[NSString stringWithFormat:@"%@('%@', %@)", LeomaCallBack, userInfo.CallBack, [[response asNSDictionary] JSONString]]];
     }else if(userInfo.InterAction == LeomaInteractionSyncReturn){
         return response;
+    }else if(userInfo.InterAction == LeomaInteractionAsyncNative && userInfo.NativeCompletion){
+        userInfo.NativeCompletion(statusCode, data);
     }
     return nil;
 }
