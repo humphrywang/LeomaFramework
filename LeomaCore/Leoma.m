@@ -123,6 +123,16 @@ void recordLeomaInteraction(LeomaInteractionModel* userInfo, LeomaResponse* resp
                withTitle:[NSString stringWithFormat:@"[接口返回异常]:%@ ;\n[返回值]:%d ;", userInfo.Handler, response.status.code]];
 }
 
+
+LeomaResponse* dispatchLeomaInteractionRequestForNative(NSString * handler, id params, BOOL sync, void(^completion)(LeomaResponse*)){
+    LeomaInteractionModel * userInfo = [[LeomaInteractionModel alloc] init];
+    userInfo.Handler = handler;
+    userInfo.InterAction = sync ? LeomaInteractionSyncNative : LeomaInteractionAsyncNative;
+    userInfo.Data = params;
+    userInfo.NativeCompletion = completion;
+    return dispatchLeomaInteractionRequest(userInfo);
+}
+
 LeomaResponse* dispatchLeomaInteractionRequest(LeomaInteractionModel* userInfo){
     tracingLeomaInteraction(userInfo);
     LeomaHandler handler = [Leoma sharedLeoma].leomaHandlers[userInfo.Handler];
@@ -144,10 +154,10 @@ LeomaResponse* sendLeomaInteractionResponse(LeomaInteractionModel* userInfo, Leo
         [userInfo.Protocol.client URLProtocolDidFinishLoading:userInfo.Protocol.client];
     }else if(userInfo.InterAction == LeomaInteractionAsyncCallBack && userInfo.CallBack && userInfo.WebView){
         [userInfo.WebView executeJS:[NSString stringWithFormat:@"%@('%@', %@)", LeomaCallBack, userInfo.CallBack, [[response asNSDictionary] JSONString]]];
-    }else if(userInfo.InterAction == LeomaInteractionSyncReturn){
+    }else if(userInfo.InterAction == LeomaInteractionSyncReturn || userInfo.InterAction == LeomaInteractionSyncNative){
         return response;
     }else if(userInfo.InterAction == LeomaInteractionAsyncNative && userInfo.NativeCompletion){
-        userInfo.NativeCompletion(statusCode, data);
+        userInfo.NativeCompletion(response);
     }
     return nil;
 }

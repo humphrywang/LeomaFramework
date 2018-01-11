@@ -6,7 +6,7 @@
 #
 Pod::Spec.new do |s|
   s.name                      = "LeomaFramework"
-  s.version                   = "1.0.1"
+  s.version                   = "1.0.2"
   s.summary                   = "Leoma Hybrid Bridge"
   s.description               = <<-DESC
                                 An optional longer description of LeomaFramework

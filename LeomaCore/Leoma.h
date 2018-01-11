@@ -11,6 +11,7 @@
 
 extern NSString * const LeomaInjectSlotCore;
 extern NSString * const LeomaInjectSlotEnvironment;
+extern LeomaResponse* dispatchLeomaInteractionRequestForNative(NSString * handler, id params, BOOL sync, void(^completion)(LeomaResponse*));
 extern LeomaResponse* dispatchLeomaInteractionRequest(LeomaInteractionModel* userInfo);
 extern LeomaResponse* sendLeomaInteractionResponse(LeomaInteractionModel* userInfo, LeomaResponseStatusCode statusCode, id data);
 extern LeomaResponse* sendLeomaSuccessResponse(LeomaInteractionModel* userInfo, id data);
