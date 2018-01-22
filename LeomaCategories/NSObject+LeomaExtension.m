@@ -438,10 +438,12 @@
             }
         } else if (type == LeomaClassType_Object) {
             result = [value asNSDictionary];
+        } else if (type == LeomaClassType_Class){
+            result = nil;
         } else {
             result = value;
         }
-        if (value) {
+        if (result) {
             [dic setObject:result forKey:propertyName];
         }
     }
