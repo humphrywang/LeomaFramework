@@ -448,6 +448,10 @@
     return dic;
 }
 
+-(id)valueForUndefinedKey:(NSString *)key{
+    return nil;
+}
+
 @end
 
 @implementation NSObject (AssociateProp)

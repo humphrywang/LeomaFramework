@@ -22,6 +22,7 @@ typedef NS_ENUM(NSInteger, LeomaClassType) {
     LeomaClassType_NSArray,                 // NSArray d
     LeomaClassType_NSDictionary,            // NSDictionary
     LeomaClassType_Object,                  // Object
+    LeomaClassType_Class,                   // Class
     LeomaClassType_Null                     // nil|NSNull
 };
 

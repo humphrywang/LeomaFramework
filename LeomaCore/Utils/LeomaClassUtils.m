@@ -59,6 +59,9 @@ NSString *const LeomaClassPropertyColumnNameKey  = @"LeomaClassPropertyColumnNam
     if (!obj || [obj isKindOfClass:[NSNull class]]) {
         return LeomaClassType_Null;
     }
+    if (object_isClass(obj)){
+        return LeomaClassType_Class;
+    }
     if ([obj isKindOfClass:[NSString class]]) {
         return LeomaClassType_NSString;
     }
