@@ -139,15 +139,15 @@
 
 #pragma mark - system
 
-+ (NSString *) macAddress;
++ (NSString *) macAddress API_DEPRECATED("iOS 7.0+ Deprecated", ios(7.0, 7.0));
 + (NSString *) deviceUID;
 + (NSString *) systemVersion;
 + (NSString *) deviceModel;
 + (NSString *) machine;
 + (NSString *) modelDetail;
 + (float) modelVersion;
-+ (NSString *) uniqueDeviceIdentifier;//mac+bundleid => md5
-+ (NSString *) uniqueGlobalDeviceIdentifier;//mac => md5
++ (NSString *) uniqueDeviceIdentifier;
++ (NSString *) uniqueGlobalDeviceIdentifier;
 + (NSString *) idfa;
 
 + (CGSize) screenSizeInPixel;

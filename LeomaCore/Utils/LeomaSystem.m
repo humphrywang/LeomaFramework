@@ -14,7 +14,7 @@
 #include <net/if_dl.h>
 #import "sys/utsname.h"
 #import "NSString+MD5Addition.h"
-#import <AdSupport/AdSupport.h>
+#import <FCUUID/FCUUID.h>
 
 @implementation LeomaSystem
 
@@ -93,20 +93,11 @@
     
 }
 + (NSString *) uniqueDeviceIdentifier{
-    NSString *macaddress = [self macAddress];
-    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-    
-    NSString *stringToHash = [NSString stringWithFormat:@"%@%@",macaddress,bundleIdentifier];
-    NSString *uniqueIdentifier = [stringToHash stringFromMD5];
-    
-    return uniqueIdentifier;
+    return [[FCUUID uuidForDevice] stringFromMD5];
 }
 
 + (NSString *) uniqueGlobalDeviceIdentifier{
-    NSString *macaddress = [self macAddress];
-    NSString *uniqueIdentifier = [macaddress stringFromMD5];
-    
-    return uniqueIdentifier;
+    return [[NSString stringWithFormat:@"%@%@", FCUUID.uuidForDevice, [NSBundle mainBundle].bundleIdentifier] stringFromMD5];
 }
 
 +(NSString *)idfa{

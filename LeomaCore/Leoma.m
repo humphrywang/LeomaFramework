@@ -45,6 +45,13 @@ static Leoma * instance;
     return instance;
 }
 
+-(void)setLeomaAPIs:(NSArray *)LeomaAPIs{
+    _LeomaAPIs = [NSMutableArray arrayWithArray:LeomaAPIs];
+    [(NSMutableArray*)_LeomaAPIs addObject:@"BuildIn.cookie_updated#Cookie:true"];
+    [(NSMutableArray*)_LeomaAPIs addObject:@"BuildIn.cookie_fetch"];
+    [(NSMutableArray*)_LeomaAPIs addObject:@"BuildIn.console_log#Extern:true"];
+}
+
 -(void)commonInit{
     self.leomaHandlers = [NSMutableDictionary dictionary];
     self.sessionStorage = [NSMutableDictionary dictionary];

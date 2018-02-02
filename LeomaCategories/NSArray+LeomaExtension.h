@@ -36,3 +36,8 @@
 + (id)arrayWithPlaceholdersOfCapacity:(NSUInteger)capacity;
 
 @end
+
+@interface NSMutableSet (WeakReferences)
++(instancetype)setUsingWeakReferences;
++(instancetype)setUsingWeakReferencesWithCapacity:(NSUInteger)capacity;
+@end

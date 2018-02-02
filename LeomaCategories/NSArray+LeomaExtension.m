@@ -56,3 +56,16 @@
     return array;
 }
 @end
+
+@implementation NSMutableSet (WeakReferences)
+
++(instancetype)setUsingWeakReferences{
+    return [self setUsingWeakReferencesWithCapacity:0];
+}
+
++(instancetype)setUsingWeakReferencesWithCapacity:(NSUInteger)capacity{
+    CFSetCallBacks callbacks = {0, NULL, NULL, CFCopyDescription, CFEqual};
+    return (id)CFBridgingRelease(CFSetCreateMutable(0, capacity, &callbacks));
+}
+
+@end

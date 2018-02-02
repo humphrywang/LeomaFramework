@@ -1,5 +1,54 @@
+//Cookie Watch
+(function(w, d){
+    w.__cookie_no_notify__ = "__cookie_no_notify__";
+    Object.defineProperty(
+        Object.prototype,
+        "leomawatch", {
+            enumerable: false,
+            configurable: true,
+            writable: false,
+            value: function (prop, descriptor, handler) {
+                var __proto_setter__ = descriptor ? descriptor.set : this.__lookupSetter__(prop);
+                var __proto_getter__ = descriptor ? descriptor.get : this.__lookupGetter__(prop);
+                var __prev_value__ = this[prop];
+                var getter = function () {
+                    return __proto_getter__.call(this);
+                };
+                var setter = function (val) {
+                    //prefx __cookie_no_notify__ dont need notify
+                    var ignore = val.indexOf(w.__cookie_no_notify__) == 0;
+                    __proto_setter__.call(this, ignore ? val.substring(w.__cookie_no_notify__.length) : val);
+                    if(!ignore) handler.call(this, prop, this[prop], __prev_value__);
+                    __prev_value__ = this[prop];
+                };
+                // can't watch constants
+                if (!delete this[prop]) return;
+                Object.defineProperty(this, prop, {
+                    get: getter,
+                    set: setter,
+                    enumerable: true,
+                    configurable: true
+                });
+            }
+        },
+    );
+    var descriptor = Object.getOwnPropertyDescriptor(Document.prototype, "cookie") || Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "cookie");
+    d.leomawatch("cookie", descriptor, function(prop, val, old){
+        var immodifyList = old.split("; ");
+        for(var i in immodifyList){
+            var cookie = immodifyList[i].trim();
+            if(cookie.length <= 0) continue;
+            else if(val.indexOf(cookie) >= 0) val = val.replace(immodifyList[i], "");//Filter No Change Cookies
+            else{
+                var item = cookie.split("=");
+                if(val.indexOf(item[0] + "=") < 0) val = item[0] +"=; " + val;//Delete Removed Cookies
+            }
+        }
+        if(Leoma.Rights.Cookie)Leoma.Invoke("BuildIn.cookie_updated", {domain: w.location.host, cookie: val});
+    });
+})(window, document);
+//History Track
 (function (w, h) {
-    //History Track
     function track (fn) {
         return function interceptor () {
             var prototype = fn.apply(this, arguments);
@@ -9,7 +58,9 @@
     };
     h.pushState = track(h.pushState);
     h.replaceState = track(h.replaceState);
-    //Leoma Inject;
+})(window, history);
+//Leoma Inject
+(function (w) {
     var tool = {
         CallBacks: {},
         AjaxPost: function (params) {
@@ -67,6 +118,12 @@
                 }
             }
             return uuid.join('');
+        },
+        Date: function(future){
+            var date = new Date();
+            if(future) date.setFullYear(date.getFullYear() + 1);
+            else date.setTime(0);
+            return date.toGMTString();
         }
     };
     /**
@@ -148,15 +205,15 @@
         }
     };
     w.Leoma = {
-        SetCookie: function (cookieString, clear) {
+        SetCookie: function (cookieString) {
             if (!cookieString) return;
             var cookies = cookieString.split("; ");
-            var date = new Date();
-            date.setFullYear(date.getFullYear() + 1);
+            var dateF = tool.Date(true); var dateP = tool.Date(false);
             for (var i = 0; i < cookies.length; i++) {
                 var temp = cookies[i].split("=");
-                if (temp.length != 2) continue;
-                document.cookie = temp[0] + "=" + (clear ? "" : temp[1]) + ";Path=/;expires=" + date.toGMTString();
+                if(!temp[0]) continue;
+                var insert = temp.length >= 2;
+                document.cookie = w.__cookie_no_notify__ + temp[0] + "=" + (insert ? temp[1] : "") + ";Path=/;expires=" + (insert ? dateF : dateP);
             }
         },
         Rights: {
@@ -186,12 +243,12 @@
             delete tool.CallBacks[callBackId];
         },
         Log: function (content) {
-            if (this.Rights.Extern) Leoma.Invoke("DeviceApp.console_log", "" + content);
+            if (this.Rights.Extern) Leoma.Invoke("BuildIn.console_log", content);
         }/*$3*/
     };
     tool.Register();
-    if (Leoma.Rights.Extern){
-        Leoma.SetCookie(document.cookie, true);
-        Leoma.SetCookie(Leoma.Invoke("DeviceApp.cookies"));
+    if (Leoma.Rights.Cookie){
+        var host = Leoma.Environment.remote ? w.location.host : Leoma.Environment.host;
+        Leoma.SetCookie(Leoma.Invoke("BuildIn.cookie_fetch", host));
     }
-})(window, history);
+})(window);

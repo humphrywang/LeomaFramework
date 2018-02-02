@@ -13,7 +13,11 @@
 #import "LeomaWebProtocol.h"
 #import "LeomaWebViewPreference.h"
 
+@interface WKWebViewConfiguration (LeomaExtension)
+-(instancetype)initWithProcessPool:(WKProcessPool*)pool;
+@end
 @interface LeomaWKWebView()
++(WKProcessPool *) sharedPool;
 
 @property (weak, nonatomic) id<LeomaWebDelegate> leomaWebDelegate;
 @property (weak, nonatomic) id<LeomaUIDelegate> leomaUIDelegate;
@@ -27,8 +31,15 @@
 @end
 
 @implementation LeomaWKWebView
++(WKProcessPool *)sharedPool{
+    static WKProcessPool * pool;
+    leoma_dispatch_once(^{
+        pool = [[WKProcessPool alloc] init];
+    });
+    return pool;
+}
 -(instancetype)initWithFrame:(CGRect)frame withPreference:(LeomaWebViewPreference *)preference withController:(UIViewController *)controller{
-    self = [super initWithFrame:frame configuration:[[WKWebViewConfiguration alloc] init]];
+    self = [super initWithFrame:frame configuration:[[WKWebViewConfiguration alloc] initWithProcessPool:LeomaWKWebView.sharedPool]];
     if(self){
         self.controller = controller;
         self.preference = preference;
@@ -222,4 +233,14 @@
     }
 }
 
+@end
+
+@implementation WKWebViewConfiguration (LeomaExtension)
+-(instancetype)initWithProcessPool:(WKProcessPool *)pool{
+    self = [self init];
+    if(self){
+        self.processPool = pool ?: self.processPool;
+    }
+    return self;
+}
 @end
