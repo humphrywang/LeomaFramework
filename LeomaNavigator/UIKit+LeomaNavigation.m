@@ -27,7 +27,11 @@
 
 -(void)viewMaybeAppear{}
 -(void)viewMaybeDisappear{}
--(void)viewHasAppear:(BOOL)animated{}
+-(void)viewHasAppear:(BOOL)animated{
+    [LeomaNavigation.activeRoot navigationBarAreaModified:LeomaNavigationBarAreaLeft WithBridge:self.bridge];
+    [LeomaNavigation.activeRoot navigationBarAreaModified:LeomaNavigationBarAreaRight WithBridge:self.bridge];
+    [LeomaNavigation.activeRoot navigationBarAreaModified:LeomaNavigationBarAreaCenter WithBridge:self.bridge];
+}
 -(void)viewHasDisappear:(BOOL)animated{}
 -(void)updateLeftGuide:(NSString *)guide{
     if(self.isActive){

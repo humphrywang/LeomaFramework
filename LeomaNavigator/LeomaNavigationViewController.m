@@ -266,6 +266,10 @@ typedef NS_ENUM(NSUInteger, LeomaNaviStatus){
     [self fireTask];
 }
 -(void)cancelInstruction{
+    if(self.status > LeomaNaviStatusPreparing){
+        if(self.navigateConfig.present) [self dismissViewController:LeomaNavigationOptionNone completion:nil];
+        return;
+    }
     [self.navigateConfig.presentingVC.view removeFromSuperview];
     if(self.navigateConfig.completion) self.navigateConfig.completion(NO);
     

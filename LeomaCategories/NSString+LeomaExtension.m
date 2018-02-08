@@ -141,11 +141,11 @@
 }
 
 - (NSString*) urlDecode{
-    return (__bridge_transfer NSString*)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (__bridge CFStringRef)self, CFSTR("!*'();:@&=+$,/?%#[]\" "), kCFStringEncodingUTF8);
+    return (__bridge_transfer NSString*)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (__bridge CFStringRef)self, CFSTR(""), kCFStringEncodingUTF8);
 }
 
 - (NSString*) urlEncode{
-    return (__bridge_transfer NSString*)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (__bridge CFStringRef)self, NULL, CFSTR("!*'();:@&=+$,/?%#[]\" "), kCFStringEncodingUTF8);
+    return (__bridge_transfer NSString*)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (__bridge CFStringRef)self, NULL, CFSTR("!*'(){};:@&=+$,/?%#[]\" "), kCFStringEncodingUTF8);
 }
 
 - (BOOL)isEqualToStringIgnoreSeperator:(NSString *)aString{
