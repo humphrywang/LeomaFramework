@@ -1,3 +1,20 @@
+//Window Status Watch
+(function(w){
+    function generateEvent(type, data){
+        var event = new Event(type);
+        event.initEvent(type, false, false);
+        event.data = data;
+        return event;
+    };
+    /**
+     * @param status 100-appeared, 101-disappeared
+     * @param data TODO
+     */
+    w.onWindowStatusChanged = function(status, data){
+        w.dispatchEvent(generateEvent("windowstatus", {status: status, data: data}))
+    };
+})(window);
+
 //Cookie Watch
 (function(w, d){
     w.__cookie_no_notify__ = "__cookie_no_notify__";
@@ -37,9 +54,9 @@
     d.leomawatch("cookie", descriptor, function(prop, val, old){
         var immodifyList = old.split("; ");
         for(var i in immodifyList){
-            var cookie = immodifyList[i].trim();
-            if(cookie.length <= 0) continue;
-            else if(val.indexOf(cookie) >= 0) val = val.replace(immodifyList[i], "");//Filter No Change Cookies
+            var cookie = immodifyList[i].trim(); var sepEqual = cookie.indexOf("=");
+            if(cookie.length <= 0 || sepEqual < 0 || sepEqual == cookie.length - 1) continue;
+            else if(val.indexOf(cookie) >= 0) val = val.replace(cookie, "");//Filter No Change Cookies
             else{
                 var item = cookie.split("=");
                 if(val.indexOf(item[0] + "=") < 0) val = item[0] +"=; " + val;//Delete Removed Cookies
